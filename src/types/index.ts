@@ -1,0 +1,135 @@
+// Task Types
+export enum TaskStatus {
+  TODO = 'TODO',
+  IN_PROGRESS = 'IN_PROGRESS',
+  DONE = 'DONE'
+}
+
+export enum TaskPriority {
+  LOW = 'LOW',
+  MEDIUM = 'MEDIUM',
+  HIGH = 'HIGH'
+}
+
+export interface Task {
+  id: number;
+  title: string;
+  description: string;
+  status: TaskStatus;
+  priority: TaskPriority;
+  assigneeId: number;
+  assignee?: User;
+  createdAt: string;
+  updatedAt: string;
+  dueDate: string;
+}
+
+export interface CreateTaskRequest {
+  title: string;
+  description?: string;
+  priority: TaskPriority;
+  assigneeId: number;
+  dueDate?: string;
+}
+
+// User Types
+export enum UserRole {
+  USER = 'USER',
+  ADMIN = 'ADMIN'
+}
+
+export interface User {
+  id: number;
+  username: string;
+  email: string;
+  name: string;
+  role: UserRole;
+  createdAt: string;
+  updatedAt?: string;
+}
+
+export interface LoginRequest {
+  username: string;
+  password: string;
+}
+
+export interface LoginResponse {
+  token: string;
+}
+
+export interface RegisterRequest {
+  username: string;
+  email: string;
+  password: string;
+  name: string;
+}
+
+// Team Types
+export interface Team {
+  id: number;
+  name: string;
+  description: string;
+  createdAt: string;
+  members?: User[];
+}
+
+// Comment Types
+export interface Comment {
+  id: number;
+  taskId: number;
+  userId: number;
+  user?: User;
+  content: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateCommentRequest {
+  content: string;
+}
+
+// Activity Types
+export interface Activity {
+  id: number;
+  userId: number;
+  user?: User;
+  action: string;
+  targetType: string;
+  targetId: number;
+  description: string;
+  createdAt: string;
+}
+
+// Dashboard Types
+export interface DashboardStats {
+  totalTasks: number;
+  completedTasks: number;
+  inProgressTasks: number;
+  todoTasks: number;
+  overdueTasks: number;
+  teamProgress: number;
+  myTasksToday: number;
+  completionRate: number;
+}
+
+export interface MyTaskSummary {
+  todayTasks: Task[];
+  upcomingTasks: Task[];
+  overdueTasks: Task[];
+}
+
+// Common API Response Types
+export interface ApiResponse<T> {
+  success: boolean;
+  message: string;
+  data: T;
+  timestamp: string;
+}
+
+export interface PagedResponse<T> {
+  content: T[];
+  page: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
+} 
