@@ -266,7 +266,7 @@ const TaskDetail: React.FC = () => {
       </Box>
 
       <Grid container spacing={3}>
-        <Grid size={{ xs: 12, md: 8 }}>
+        <Grid item xs={12} md={8}>
           <Paper sx={{ p: 3, mb: 3 }}>
             <Typography variant="h6" gutterBottom>
               Description
@@ -355,7 +355,7 @@ const TaskDetail: React.FC = () => {
           </Paper>
         </Grid>
 
-        <Grid size={{ xs: 12, md: 4 }}>
+        <Grid item xs={12} md={4}>
           <Paper sx={{ p: 3, mb: 3 }}>
             <Typography variant="h6" gutterBottom>
               Details
@@ -441,7 +441,7 @@ const TaskDetail: React.FC = () => {
               onChange={handleInputChange}
             />
             <Grid container spacing={2} sx={{ mt: 1 }}>
-              <Grid size={{ xs: 12, sm: 6 }}>
+              <Grid item xs={12} sm={6}>
                 <FormControl fullWidth>
                   <InputLabel>Priority</InputLabel>
                   <Select
@@ -464,7 +464,7 @@ const TaskDetail: React.FC = () => {
                   </Select>
                 </FormControl>
               </Grid>
-              <Grid size={{ xs: 12, sm: 6 }}>
+              <Grid item xs={12} sm={6}>
                 <FormControl fullWidth>
                   <InputLabel>Assignee</InputLabel>
                   <Select
@@ -489,7 +489,7 @@ const TaskDetail: React.FC = () => {
                   </Select>
                 </FormControl>
               </Grid>
-              <Grid size={{ xs: 12 }}>
+              <Grid item xs={12}>
                 <TextField
                   fullWidth
                   label="Due Date"

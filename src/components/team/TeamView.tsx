@@ -148,7 +148,7 @@ const TeamView: React.FC = () => {
                 : 0;
 
               return (
-                <Grid size={{ xs: 12, md: 6 }} key={member.id}>
+                <Grid item xs={12} md={6} key={member.id}>
                   <Card>
                     <CardContent>
                       <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
@@ -204,7 +204,7 @@ const TeamView: React.FC = () => {
             })}
 
             {members.length === 0 && (
-              <Grid size={{ xs: 12 }}>
+              <Grid item xs={12}>
                 <Paper sx={{ p: 3, textAlign: 'center' }}>
                   <Typography variant="body1">No team members found.</Typography>
                 </Paper>
