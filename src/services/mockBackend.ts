@@ -1,6 +1,6 @@
-import { Task, User, Team, Comment, Activity, TaskStatus, TaskPriority, UserRole, DashboardStats, MyTaskSummary } from '../types';
-import { ApiResponse, PagedResponse } from '../types';
+import { Task, User, Team, Comment, Activity, TaskStatus, TaskPriority, UserRole, DashboardStats, MyTaskSummary, ApiResponse, PagedResponse, PagedApiResponse, ActivityLog, ActivityType } from '../types';
 import { subDays, addDays, format } from 'date-fns';
+import { ActivityLogFilters } from './activityService';
 
 // Mock data
 const users: User[] = [
@@ -183,6 +183,29 @@ const activities: Activity[] = [
   },
 ];
 
+// Mock activity logs
+const activityLogs = [
+  {
+    id: 1,
+    type: 'TASK_CREATED',
+    userId: 1,
+    user: users[0],
+    taskId: 1,
+    timestamp: new Date().toISOString(),
+    description: '새로운 작업이 생성되었습니다.',
+  },
+  {
+    id: 2,
+    type: 'TASK_STATUS_CHANGED',
+    userId: 1,
+    user: users[0],
+    taskId: 1,
+    timestamp: new Date().toISOString(),
+    description: '작업 상태가 TODO에서 IN_PROGRESS로 변경되었습니다.',
+  },
+  // Add more mock activity logs as needed
+];
+
 // Helper functions
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -193,19 +216,18 @@ const createSuccessResponse = <T>(data: T): ApiResponse<T> => ({
   timestamp: new Date().toISOString(),
 });
 
-const createPagedResponse = <T>(items: T[], page: number, size: number): PagedResponse<T> => {
+function paginateResults<T>(items: T[], page: number, size: number): PagedResponse<T> {
   const start = page * size;
-  const end = start + size;
-  const content = items.slice(start, end);
+  const content = items.slice(start, start + size);
   
   return {
     content,
-    page,
-    size,
     totalElements: items.length,
     totalPages: Math.ceil(items.length / size),
+    size,
+    number: page
   };
-};
+}
 
 // Mock API handlers
 export const mockAuthService = {
@@ -295,6 +317,22 @@ export const mockAuthService = {
     
     return createSuccessResponse(users[userIndex]);
   },
+  
+  withdrawAccount: async (password: string) => {
+    await delay(700);
+    
+    // Check if password is correct (in mock, we just check if it's not empty)
+    if (!password) {
+      return {
+        success: false,
+        message: '비밀번호가 일치하지 않습니다.',
+        data: null,
+        timestamp: new Date().toISOString(),
+      };
+    }
+    
+    return createSuccessResponse(null);
+  },
 };
 
 export const mockTaskService = {
@@ -319,7 +357,7 @@ export const mockTaskService = {
       filteredTasks = filteredTasks.filter(task => task.assigneeId === assigneeId);
     }
     
-    return createSuccessResponse(createPagedResponse(filteredTasks, page, size));
+    return createSuccessResponse(paginateResults(filteredTasks, page, size));
   },
   
   getTaskById: async (id: number) => {
@@ -501,7 +539,7 @@ export const mockTaskService = {
       task.description.toLowerCase().includes(searchLower)
     );
     
-    return createSuccessResponse(createPagedResponse(filteredTasks, page, size));
+    return createSuccessResponse(paginateResults(filteredTasks, page, size));
   },
 };
 
@@ -730,7 +768,7 @@ export const mockDashboardService = {
       new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
     );
     
-    return createSuccessResponse(createPagedResponse(sortedActivities, page, size));
+    return createSuccessResponse(paginateResults(sortedActivities, page, size));
   },
   
   getMyActivities: async (page = 0, size = 10) => {
@@ -741,7 +779,7 @@ export const mockDashboardService = {
       new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
     );
     
-    return createSuccessResponse(createPagedResponse(sortedActivities, page, size));
+    return createSuccessResponse(paginateResults(sortedActivities, page, size));
   },
   
   search: async (query: string) => {
@@ -771,4 +809,56 @@ export const mockDashboardService = {
       teams: matchedTeams,
     });
   },
+};
+
+export const mockActivityService = {
+  getActivityLogs: async (
+    page: number = 0, 
+    size: number = 10,
+    filters: ActivityLogFilters = {}
+  ): Promise<PagedApiResponse<ActivityLog>> => {
+    await delay(500);
+
+    let filteredLogs = activityLogs.map(log => ({
+      ...log,
+      type: ActivityType[log.type as keyof typeof ActivityType]
+    }));
+
+    // Apply filters
+    if (filters.type) {
+      filteredLogs = filteredLogs.filter(log => log.type === filters.type);
+    }
+    if (filters.taskId) {
+      const taskId = parseInt(filters.taskId);
+      if (!isNaN(taskId)) {
+        filteredLogs = filteredLogs.filter(log => log.taskId === taskId);
+      }
+    }
+    if (filters.userId) {
+      const userId = parseInt(filters.userId);
+      if (!isNaN(userId)) {
+        filteredLogs = filteredLogs.filter(log => log.userId === userId);
+      }
+    }
+    if (filters.startDate) {
+      const startDate = new Date(filters.startDate).toISOString();
+      filteredLogs = filteredLogs.filter(log => log.timestamp >= startDate);
+    }
+    if (filters.endDate) {
+      const endDate = new Date(filters.endDate).toISOString();
+      filteredLogs = filteredLogs.filter(log => log.timestamp <= endDate);
+    }
+
+    // Sort by timestamp descending
+    filteredLogs.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+
+    const paginatedLogs = paginateResults(filteredLogs, page, size);
+
+    return {
+      success: true,
+      message: '',
+      data: paginatedLogs,
+      timestamp: new Date().toISOString()
+    };
+  }
 }; 

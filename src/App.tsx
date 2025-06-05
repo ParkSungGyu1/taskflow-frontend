@@ -13,6 +13,8 @@ import TeamView from './components/team/TeamView';
 import Search from './components/search/Search';
 import Login from './components/auth/Login';
 import Register from './components/auth/Register';
+import Profile from './components/profile/Profile';
+import ActivityLog from './components/activity/ActivityLog';
 
 // Components
 import PrivateRoute from './components/common/PrivateRoute';
@@ -38,6 +40,8 @@ const App: React.FC = () => {
               <Route path="/tasks/:id" element={<TaskDetail />} />
               <Route path="/team" element={<TeamView />} />
               <Route path="/search" element={<Search />} />
+              <Route path="/profile" element={<Profile />} />
+              <Route path="/activities" element={<ActivityLog />} />
             </Route>
           </Route>
           

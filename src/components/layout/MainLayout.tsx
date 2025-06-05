@@ -34,6 +34,8 @@ import {
   Brightness4 as DarkModeIcon,
   Brightness7 as LightModeIcon,
   ChevronLeft as ChevronLeftIcon,
+  Person as ProfileIcon,
+  History as ActivityIcon,
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
@@ -102,9 +104,14 @@ const MainLayout: React.FC = () => {
 
   const menuItems = [
     { text: '대시보드', icon: <DashboardIcon />, path: '/' },
-    { text: '작업 관리', icon: <TaskIcon />, path: '/tasks' },
+    { text: '작업 보드', icon: <TaskIcon />, path: '/tasks' },
     { text: '팀 관리', icon: <TeamIcon />, path: '/team' },
     { text: '검색', icon: <SearchIcon />, path: '/search' },
+    { text: '활동 로그', icon: <ActivityIcon />, path: '/activities' },
+  ];
+
+  const userMenuItems = [
+    { text: '내 프로필', icon: <ProfileIcon />, path: '/profile' },
   ];
 
   const drawer = (
@@ -343,10 +350,15 @@ const MainLayout: React.FC = () => {
                 }
               }}
             >
-              <MenuItem onClick={handleProfile}>
-                <ListItemIcon><AccountCircle fontSize="small" /></ListItemIcon>
-                프로필
-              </MenuItem>
+              {userMenuItems.map((item) => (
+                <MenuItem key={item.text} onClick={() => {
+                  navigate(item.path);
+                  handleClose();
+                }}>
+                  <ListItemIcon>{item.icon}</ListItemIcon>
+                  {item.text}
+                </MenuItem>
+              ))}
               <MenuItem onClick={handleSettings}>
                 <ListItemIcon><SettingsIcon fontSize="small" /></ListItemIcon>
                 설정

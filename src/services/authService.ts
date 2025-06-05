@@ -147,4 +147,21 @@ export const isAuthenticated = (): boolean => {
     console.error('Authentication check error:', error);
     return false;
   }
+};
+
+export const withdrawAccount = async (password: string) => {
+  try {
+    if (useMock) {
+      return mockAuthService.withdrawAccount(password);
+    }
+    return post<void>('/auth/withdraw', { password });
+  } catch (error) {
+    console.error('Withdraw account error:', error);
+    return {
+      success: false,
+      message: '회원탈퇴 처리 중 오류가 발생했습니다.',
+      data: null,
+      timestamp: new Date().toISOString()
+    };
+  }
 }; 

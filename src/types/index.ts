@@ -128,8 +128,34 @@ export interface ApiResponse<T> {
 
 export interface PagedResponse<T> {
   content: T[];
-  page: number;
-  size: number;
   totalElements: number;
   totalPages: number;
+  size: number;
+  number: number;
+}
+
+export interface PagedApiResponse<T> extends ApiResponse<PagedResponse<T>> {}
+
+export interface ActivityLog {
+  id: number;
+  type: ActivityType;
+  userId: number;
+  user: User;
+  taskId?: number;
+  timestamp: string;
+  description: string;
+}
+
+export enum ActivityType {
+  TASK_CREATED = 'TASK_CREATED',
+  TASK_UPDATED = 'TASK_UPDATED',
+  TASK_DELETED = 'TASK_DELETED',
+  TASK_STATUS_CHANGED = 'TASK_STATUS_CHANGED',
+  COMMENT_CREATED = 'COMMENT_CREATED',
+  COMMENT_UPDATED = 'COMMENT_UPDATED',
+  COMMENT_DELETED = 'COMMENT_DELETED',
+}
+
+export interface WithdrawRequest {
+  password: string;
 } 
