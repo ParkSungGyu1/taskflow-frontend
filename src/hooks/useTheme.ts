@@ -8,7 +8,7 @@ type ThemeMode = 'light' | 'dark' | 'system';
 export const useTheme = () => {
   const [themeMode, setThemeMode] = useState<ThemeMode>(() => {
     const savedTheme = localStorage.getItem('themeMode') as ThemeMode;
-    return savedTheme || 'system';
+    return savedTheme || 'light';
   });
 
   const [isDarkMode, setIsDarkMode] = useState<boolean>(() => {
