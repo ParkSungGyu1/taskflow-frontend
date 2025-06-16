@@ -57,10 +57,13 @@ const Login: React.FC = () => {
         await refreshUser();
         
         // 이전 페이지 또는 홈으로 리다이렉트
-        const from = location.state?.from?.pathname || 
-          sessionStorage.getItem('redirectAfterLogin') || '/';
-        sessionStorage.removeItem('redirectAfterLogin');
-        navigate(from);
+        // const from = location.state?.from?.pathname || 
+        // sessionStorage.getItem('redirectAfterLogin') || '/';
+        // sessionStorage.removeItem('redirectAfterLogin');
+        // navigate(from);
+        
+        // 프로필 페이지로 리다이렉트
+        navigate('/profile');
       } else {
         setError(response.message || '아이디 또는 비밀번호가 일치하지 않습니다');
       }

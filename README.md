@@ -72,6 +72,77 @@ spring.web.cors.allow-credentials=true
 
 ## API 명세
 
+### API 명세 작성의 중요성
+- 프론트엔드와 백엔드 개발자 간의 명확한 인터페이스 정의
+- 데이터 구조와 통신 방식을 표준화하여 개발 효율성 향상
+- API 문서화를 통한 유지보수성 개선
+
+### API 명세 작성 시 고려사항
+1. **엔드포인트 구조**
+   - RESTful API 설계 원칙 준수
+   - 리소스 중심의 URL 구조 설계
+   - HTTP 메서드(GET, POST, PUT, DELETE 등)의 적절한 사용
+
+2. **요청/응답 형식**
+   - JSON 형식의 데이터 구조 정의
+   - 요청 파라미터와 응답 데이터의 타입 명시
+   - 에러 처리 방안 정의
+
+3. **인증/인가**
+   - JWT, OAuth 등 인증 방식 정의
+   - 권한에 따른 API 접근 제어 방안
+
+4. **API 버전 관리**
+   - 버전 관리 전략 수립
+   - 하위 호환성 유지 방안
+
+### API 명세 문서화 도구
+- Swagger/OpenAPI
+- Postman
+- API Blueprint
+- RAML
+
+### API 명세 작성 예시
+```typescript
+// 사용자 정보 조회 API
+GET /api/v1/users/{userId}
+
+Request:
+- Path Parameters:
+  - userId: string (required)
+
+Response:
+{
+  "id": string,
+  "name": string,
+  "email": string,
+  "createdAt": string
+}
+
+Error Response:
+{
+  "code": number,
+  "message": string
+}
+```
+
+### 프론트엔드-백엔드 협업 시 주의사항
+1. **명확한 커뮤니케이션**
+   - API 변경사항에 대한 사전 공유
+   - 프론트엔드 요구사항의 명확한 전달
+
+2. **테스트 환경 구축**
+   - Mock API 서버 활용
+   - API 테스트 자동화
+
+3. **에러 처리**
+   - 일관된 에러 응답 형식
+   - 프론트엔드에서의 에러 핸들링 방안
+
+4. **성능 최적화**
+   - API 응답 시간 최적화
+   - 캐싱 전략 수립
+
 ### 공통 응답 형식
 ```typescript
 {

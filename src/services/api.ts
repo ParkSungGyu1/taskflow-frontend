@@ -47,9 +47,9 @@ api.interceptors.response.use(
   (response: AxiosResponse) => {
     return response;
   },
-  (error: AxiosError) => {
+  async (error: AxiosError) => {
     // Handle unauthorized errors (401)
-    if (error.response?.status === 401) {
+    if (error.response?.status === 401 && !error.config?.url?.includes('/auth/login')) {
       handleUnauthorized();
     }
     
@@ -63,6 +63,11 @@ api.interceptors.response.use(
     if (error.code === 'ECONNABORTED' || error.message === 'Network Error') {
       console.error('Network error:', error);
       // 여기서 네트워크 에러에 대한 전역 알림 표시 로직을 추가할 수 있음
+    }
+    
+    // 에러 응답이 있는 경우 해당 응답을 반환
+    if (error.response?.data) {
+      return error.response;
     }
     
     return Promise.reject(error);

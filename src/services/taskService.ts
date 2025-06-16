@@ -3,7 +3,7 @@ import { get, post, put, del } from './api';
 import { mockTaskService } from './mockBackend';
 
 // Use mock service for development until backend is ready
-const useMock = true;
+const useMock = false;
 
 // Task Management Service API
 export const getTasks = async (page = 0, size = 10, status?: TaskStatus, search?: string, assigneeId?: number) => {

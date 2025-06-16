@@ -4,7 +4,7 @@ import { mockAuthService } from './mockBackend';
 import { getToken, setToken, removeToken, isValidToken } from '../utils/security';
 
 // Use mock service for development until backend is ready
-const useMock = true;
+const useMock = false;
 
 /**
  * Authenticate user and store token
@@ -18,7 +18,6 @@ export const login = async (credentials: LoginRequest) => {
       }
       return response;
     }
-
     const response = await post<LoginResponse>('/auth/login', credentials);
     if (response.success && response.data && response.data.token) {
       setToken(response.data.token);
