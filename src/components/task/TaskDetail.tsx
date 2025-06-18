@@ -84,7 +84,7 @@ const TaskDetail: React.FC = () => {
       }
       
       if (commentsResponse.success) {
-        setComments(commentsResponse.data);
+        setComments(commentsResponse.data.content);
       }
     } catch (err) {
       console.error('Error fetching task data:', err);
@@ -129,15 +129,7 @@ const TaskDetail: React.FC = () => {
       const response = await createComment(taskId, commentRequest);
       if (response.success && response.data) {
         // Add the new comment to the list
-        const newComment: Comment = {
-          id: response.data.id || 0,
-          taskId: taskId,
-          userId: user?.id || 0,
-          content: commentText,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-          user: user,
-        };
+        const newComment: Comment = response.data;
         setComments([...comments, newComment]);
         setCommentText('');
       }
@@ -165,7 +157,7 @@ const TaskDetail: React.FC = () => {
       title: task.title,
       description: task.description,
       priority: task.priority,
-      assigneeId: task.assigneeId,
+      assigneeId: task.assignee?.id || task.assigneeId,
       dueDate: task.dueDate,
     });
     setOpenEditDialog(true);
@@ -184,12 +176,16 @@ const TaskDetail: React.FC = () => {
   };
 
   const handleSaveTask = async () => {
-    if (!task) return;
+    if (!editedTask) return;
     
     try {
-      const response = await updateTask(taskId, editedTask);
-      if (response.success) {
-        setTask({ ...task, ...editedTask });
+      const response = await updateTask(taskId, {
+        ...editedTask,
+        dueDate: editedTask.dueDate ? editedTask.dueDate.replace('Z', '') : editedTask.dueDate
+      });
+      
+      if (response.success && response.data) {
+        setTask(response.data);
         handleCloseEditDialog();
       }
     } catch (err) {
@@ -382,7 +378,7 @@ const TaskDetail: React.FC = () => {
                 Assignee
               </Typography>
               <Typography variant="body1">
-                {users.find(u => u.id === task.assigneeId)?.name || 'Unassigned'}
+                {task.assignee?.name || 'Unassigned'}
               </Typography>
             </Box>
             
@@ -494,9 +490,19 @@ const TaskDetail: React.FC = () => {
                   fullWidth
                   label="Due Date"
                   name="dueDate"
-                  type="date"
-                  value={editedTask.dueDate || ''}
-                  onChange={handleInputChange}
+                  type="datetime-local"
+                  value={editedTask.dueDate ? editedTask.dueDate.substring(0, 16) : ''}
+                  onChange={(e) => {
+                    const dateValue = e.target.value;
+                    // Format: "2025-06-18T03:12:00" without 'Z' suffix
+                    const formattedDate = dateValue ? `${dateValue}:00` : '';
+                    handleInputChange({
+                      target: {
+                        name: 'dueDate',
+                        value: formattedDate
+                      }
+                    } as any);
+                  }}
                   InputLabelProps={{
                     shrink: true,
                   }}

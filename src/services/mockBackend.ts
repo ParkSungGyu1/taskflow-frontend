@@ -454,7 +454,16 @@ export const mockTaskService = {
     if (taskIndex === -1) {
       return {
         success: false,
-        message: '작업을 찾을 수 없습니다',
+        message: '해당 ID의 작업을 찾을 수 없습니다.',
+        data: null,
+        timestamp: new Date().toISOString(),
+      } as ApiResponse<null>;
+    }
+
+    if (!Object.values(TaskStatus).includes(status)) {
+      return {
+        success: false,
+        message: '유효하지 않은 상태값입니다.',
         data: null,
         timestamp: new Date().toISOString(),
       } as ApiResponse<null>;
@@ -469,24 +478,23 @@ export const mockTaskService = {
     tasks[taskIndex] = updatedTask;
     
     // Create an activity for the status change
-    const statusMap = {
-      [TaskStatus.TODO]: '할 일',
-      [TaskStatus.IN_PROGRESS]: '진행 중',
-      [TaskStatus.DONE]: '완료'
-    };
-    
     activities.push({
       id: activities.length + 1,
-      userId: 1, // Assuming current user is admin
+      userId: 1,
       user: users[0],
       action: 'updated_status',
       targetType: 'task',
       targetId: id,
-      description: `"${updatedTask.title}"을 ${statusMap[status]}로 이동했습니다`,
+      description: `작업 상태가 ${status}로 변경되었습니다.`,
       createdAt: new Date().toISOString(),
     });
     
-    return createSuccessResponse(updatedTask);
+    return {
+      success: true,
+      message: '작업 상태가 업데이트되었습니다.',
+      data: updatedTask,
+      timestamp: new Date().toISOString(),
+    } as ApiResponse<Task>;
   },
   
   deleteTask: async (id: number) => {
@@ -549,7 +557,7 @@ export const mockCommentService = {
     
     const taskComments = comments.filter(c => c.taskId === taskId);
     
-    return createSuccessResponse(taskComments);
+    return createSuccessResponse(paginateResults(taskComments, 0, 20));
   },
   
   createComment: async (taskId: number, commentData: { content: string }) => {

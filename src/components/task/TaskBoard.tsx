@@ -212,13 +212,17 @@ const TaskBoard: React.FC = () => {
         const response = await updateTask(editingTask.id, {
           ...editingTask,
           ...taskForm,
+          dueDate: taskForm.dueDate ? taskForm.dueDate.replace('Z', '') : taskForm.dueDate // Remove 'Z' suffix if exists
         });
         if (response.success) {
           fetchTasks();
         }
       } else {
         // 새 작업 생성
-        const response = await createTask(taskForm);
+        const response = await createTask({
+          ...taskForm,
+          dueDate: taskForm.dueDate ? taskForm.dueDate.replace('Z', '') : taskForm.dueDate // Remove 'Z' suffix if exists
+        });
         if (response.success) {
           fetchTasks();
         }
@@ -491,9 +495,19 @@ const TaskBoard: React.FC = () => {
                 fullWidth
                 label="마감일"
                 name="dueDate"
-                type="date"
-                value={taskForm.dueDate}
-                onChange={handleInputChange}
+                type="datetime-local"
+                value={taskForm.dueDate ? taskForm.dueDate.substring(0, 16) : ''}
+                onChange={(e) => {
+                  const dateValue = e.target.value;
+                  // Format: "2025-06-18T03:12:00" without 'Z' suffix
+                  const formattedDate = dateValue ? `${dateValue}:00` : '';
+                  handleInputChange({
+                    target: {
+                      name: 'dueDate',
+                      value: formattedDate
+                    }
+                  } as any);
+                }}
                 InputLabelProps={{
                   shrink: true,
                 }}

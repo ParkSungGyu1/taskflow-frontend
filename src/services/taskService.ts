@@ -1,5 +1,5 @@
 import { CreateTaskRequest, PagedResponse, Task, TaskStatus } from '../types';
-import { get, post, put, del } from './api';
+import { get, post, put, del, patch } from './api';
 import { mockTaskService } from './mockBackend';
 
 // Use mock service for development until backend is ready
@@ -53,7 +53,7 @@ export const updateTaskStatus = async (id: number, status: TaskStatus) => {
   if (useMock) {
     return mockTaskService.updateTaskStatus(id, status);
   }
-  return put<Task>(`/tasks/${id}/status`, { status });
+  return patch<Task>(`/tasks/${id}/status`, { status });
 };
 
 export const searchTasks = async (query: string, page = 0, size = 10) => {

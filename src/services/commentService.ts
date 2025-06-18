@@ -1,4 +1,4 @@
-import { Comment, CreateCommentRequest } from '../types';
+import { Comment, CreateCommentRequest, PagedResponse } from '../types';
 import { get, post, put, del } from './api';
 import { mockCommentService } from './mockBackend';
 
@@ -10,7 +10,7 @@ export const getTaskComments = async (taskId: number) => {
   if (useMock) {
     return mockCommentService.getTaskComments(taskId);
   }
-  return get<Comment[]>(`/tasks/${taskId}/comments`);
+  return get<PagedResponse<Comment>>(`/tasks/${taskId}/comments`);
 };
 
 export const createComment = async (taskId: number, comment: CreateCommentRequest) => {
