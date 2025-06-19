@@ -27,9 +27,11 @@ export const updateComment = async (commentId: number, content: string) => {
   return put<Comment>(`/comments/${commentId}`, { content });
 };
 
-export const deleteComment = async (commentId: number) => {
+export const deleteComment = async (taskId: number, commentId: number) => {
   if (useMock) {
-    return mockCommentService.deleteComment(commentId);
+    return mockCommentService.deleteComment(taskId, commentId);
   }
-  return del<void>(`/comments/${commentId}`);
+  return del<{ success: boolean; message: string; data: null; timestamp: string }>(
+    `/tasks/${taskId}/comments/${commentId}`
+  );
 }; 

@@ -142,9 +142,11 @@ const TaskDetail: React.FC = () => {
     if (!window.confirm('Are you sure you want to delete this comment?')) return;
     
     try {
-      await deleteComment(commentId);
-      // Remove the comment from the list
-      setComments(comments.filter(comment => comment.id !== commentId));
+      const response = await deleteComment(taskId, commentId);
+      if (response.success) {
+        // Remove the comment from the list
+        setComments(comments.filter(comment => comment.id !== commentId));
+      }
     } catch (err) {
       console.error('Error deleting comment:', err);
     }

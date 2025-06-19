@@ -624,10 +624,10 @@ export const mockCommentService = {
     return createSuccessResponse(updatedComment);
   },
   
-  deleteComment: async (commentId: number) => {
+  deleteComment: async (taskId: number, commentId: number) => {
     await delay(400);
     
-    const commentIndex = comments.findIndex(c => c.id === commentId);
+    const commentIndex = comments.findIndex(c => c.id === commentId && c.taskId === taskId);
     
     if (commentIndex === -1) {
       return {
@@ -635,12 +635,29 @@ export const mockCommentService = {
         message: '댓글을 찾을 수 없습니다',
         data: null,
         timestamp: new Date().toISOString(),
-      } as ApiResponse<null>;
+      };
     }
     
     comments.splice(commentIndex, 1);
     
-    return createSuccessResponse(null);
+    // Create an activity for the comment deletion
+    activities.push({
+      id: activities.length + 1,
+      userId: 1, // Assuming current user is admin
+      user: users[0],
+      action: 'deleted_comment',
+      targetType: 'comment',
+      targetId: commentId,
+      description: `작업 #${taskId}의 댓글을 삭제했습니다`,
+      createdAt: new Date().toISOString(),
+    });
+    
+    return {
+      success: true,
+      message: '댓글이 삭제되었습니다.',
+      data: null,
+      timestamp: new Date().toISOString(),
+    };
   },
 };
 
