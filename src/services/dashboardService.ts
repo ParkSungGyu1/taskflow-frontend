@@ -1,4 +1,4 @@
-import { Activity, DashboardStats, MyTaskSummary } from '../types';
+import { Activity, DashboardStats, MyTaskSummary, PagedResponse } from '../types';
 import { get } from './api';
 import { mockDashboardService } from './mockBackend';
 
@@ -45,7 +45,7 @@ export const getActivities = async (page = 0, size = 10) => {
   params.append('page', page.toString());
   params.append('size', size.toString());
   
-  return get<Activity[]>(`/activities?${params.toString()}`);
+  return get<PagedResponse<Activity>>(`/activities?${params.toString()}`);
 };
 
 export const getMyActivities = async (page = 0, size = 10) => {
@@ -57,7 +57,7 @@ export const getMyActivities = async (page = 0, size = 10) => {
   params.append('page', page.toString());
   params.append('size', size.toString());
   
-  return get<Activity[]>(`/activities/my?${params.toString()}`);
+  return get<PagedResponse<Activity>>(`/activities/my?${params.toString()}`);
 };
 
 export const search = async (query: string) => {
