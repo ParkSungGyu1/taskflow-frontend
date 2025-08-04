@@ -3,14 +3,19 @@ import { get, post, put, del } from './api';
 import { mockCommentService } from './mockBackend';
 
 // Use mock service for development until backend is ready
-const useMock = false;
+const useMock = true;
 
 // Comment Service API
-export const getTaskComments = async (taskId: number) => {
+export const getTaskComments = async (taskId: number, page: number = 0, size: number = 10) => {
   if (useMock) {
-    return mockCommentService.getTaskComments(taskId);
+    return mockCommentService.getTaskComments(taskId, page, size);
   }
-  return get<PagedResponse<Comment>>(`/tasks/${taskId}/comments`);
+  
+  const params = new URLSearchParams();
+  params.append('page', page.toString());
+  params.append('size', size.toString());
+  
+  return get<PagedResponse<Comment>>(`/tasks/${taskId}/comments?${params.toString()}`);
 };
 
 export const createComment = async (taskId: number, comment: CreateCommentRequest) => {

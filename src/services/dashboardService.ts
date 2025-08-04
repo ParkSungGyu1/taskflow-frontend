@@ -3,7 +3,7 @@ import { get } from './api';
 import { mockDashboardService } from './mockBackend';
 
 // Use mock service for development until backend is ready
-const useMock = false;
+const useMock = true;
 
 // Dashboard & Reports Service API
 export const getDashboardStats = async () => {

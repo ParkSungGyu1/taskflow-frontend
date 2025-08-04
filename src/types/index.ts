@@ -80,12 +80,15 @@ export interface Comment {
   userId: number;
   user?: User;
   content: string;
+  parentId?: number; // null for top-level comments, set for replies
+  replies?: Comment[]; // nested replies
   createdAt: string;
   updatedAt: string;
 }
 
 export interface CreateCommentRequest {
   content: string;
+  parentId?: number; // For creating replies
 }
 
 // Activity Types

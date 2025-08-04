@@ -9,13 +9,6 @@ import {
   Chip,
   Button,
   IconButton,
-  Divider,
-  TextField,
-  List,
-  ListItem,
-  ListItemText,
-  ListItemAvatar,
-  Avatar,
   CircularProgress,
   FormControl,
   InputLabel,
@@ -25,18 +18,18 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  TextField,
 } from '@mui/material';
 import {
   Edit as EditIcon,
   Delete as DeleteIcon,
-  Send as SendIcon,
   ArrowBack as BackIcon,
 } from '@mui/icons-material';
 import { format } from 'date-fns';
 import { getTaskById, updateTask, updateTaskStatus, deleteTask } from '../../services/taskService';
-import { getTaskComments, createComment, deleteComment } from '../../services/commentService';
+import Comments from './Comments';
 import { getUsers } from '../../services/authService';
-import { Task, Comment, TaskStatus, TaskPriority, User, CreateCommentRequest } from '../../types';
+import { Task, TaskStatus, TaskPriority, User } from '../../types';
 import { useAuth } from '../../context/AuthContext';
 
 const priorityColors = {
@@ -58,10 +51,8 @@ const TaskDetail: React.FC = () => {
   const { user } = useAuth();
   
   const [task, setTask] = useState<Task | null>(null);
-  const [comments, setComments] = useState<Comment[]>([]);
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
-  const [commentText, setCommentText] = useState('');
   const [error, setError] = useState('');
   const [openEditDialog, setOpenEditDialog] = useState(false);
   const [editedTask, setEditedTask] = useState<Partial<Task>>({});
@@ -77,14 +68,9 @@ const TaskDetail: React.FC = () => {
     try {
       setLoading(true);
       const taskResponse = await getTaskById(taskId);
-      const commentsResponse = await getTaskComments(taskId);
       
       if (taskResponse.success) {
         setTask(taskResponse.data);
-      }
-      
-      if (commentsResponse.success) {
-        setComments(commentsResponse.data.content);
       }
     } catch (err) {
       console.error('Error fetching task data:', err);
@@ -118,39 +104,7 @@ const TaskDetail: React.FC = () => {
     }
   };
 
-  const handleCommentSubmit = async () => {
-    if (!commentText.trim() || !user) return;
-    
-    try {
-      const commentRequest: CreateCommentRequest = {
-        content: commentText,
-      };
-      
-      const response = await createComment(taskId, commentRequest);
-      if (response.success && response.data) {
-        // Add the new comment to the list
-        const newComment: Comment = response.data;
-        setComments([...comments, newComment]);
-        setCommentText('');
-      }
-    } catch (err) {
-      console.error('Error creating comment:', err);
-    }
-  };
 
-  const handleDeleteComment = async (commentId: number) => {
-    if (!window.confirm('Are you sure you want to delete this comment?')) return;
-    
-    try {
-      const response = await deleteComment(taskId, commentId);
-      if (response.success) {
-        // Remove the comment from the list
-        setComments(comments.filter(comment => comment.id !== commentId));
-      }
-    } catch (err) {
-      console.error('Error deleting comment:', err);
-    }
-  };
 
   const handleOpenEditDialog = () => {
     if (!task) return;
@@ -274,83 +228,7 @@ const TaskDetail: React.FC = () => {
             </Typography>
           </Paper>
 
-          <Paper sx={{ p: 3 }}>
-            <Typography variant="h6" gutterBottom>
-              Comments
-            </Typography>
-            <List>
-              {comments.length > 0 ? (
-                comments.map((comment) => (
-                  <React.Fragment key={comment.id}>
-                    <ListItem alignItems="flex-start">
-                      <ListItemAvatar>
-                        <Avatar sx={{ bgcolor: 'secondary.main' }}>
-                          {comment.user?.name?.charAt(0) || 'U'}
-                        </Avatar>
-                      </ListItemAvatar>
-                      <ListItemText
-                        primary={
-                          <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                            <Typography variant="subtitle2">
-                              {comment.user?.name || 'Unknown User'}
-                            </Typography>
-                            <Typography variant="caption" color="text.secondary">
-                              {format(new Date(comment.createdAt), 'PP p')}
-                            </Typography>
-                          </Box>
-                        }
-                        secondary={
-                          <Typography
-                            variant="body2"
-                            color="text.primary"
-                            sx={{ mt: 1, whiteSpace: 'pre-line' }}
-                          >
-                            {comment.content}
-                          </Typography>
-                        }
-                      />
-                      {user && comment.userId === user.id && (
-                        <IconButton
-                          edge="end"
-                          size="small"
-                          onClick={() => handleDeleteComment(comment.id)}
-                        >
-                          <DeleteIcon fontSize="small" />
-                        </IconButton>
-                      )}
-                    </ListItem>
-                    <Divider variant="inset" component="li" />
-                  </React.Fragment>
-                ))
-              ) : (
-                <Typography variant="body2" color="text.secondary" sx={{ py: 2 }}>
-                  No comments yet. Be the first to add a comment!
-                </Typography>
-              )}
-            </List>
-
-            <Box sx={{ display: 'flex', mt: 2 }}>
-              <TextField
-                fullWidth
-                variant="outlined"
-                placeholder="Add a comment..."
-                multiline
-                rows={2}
-                value={commentText}
-                onChange={(e) => setCommentText(e.target.value)}
-              />
-              <Button
-                variant="contained"
-                color="primary"
-                sx={{ ml: 2, alignSelf: 'flex-end' }}
-                onClick={handleCommentSubmit}
-                disabled={!commentText.trim()}
-                endIcon={<SendIcon />}
-              >
-                Post
-              </Button>
-            </Box>
-          </Paper>
+          <Comments taskId={taskId} />
         </Grid>
 
         <Grid item xs={12} md={4}>

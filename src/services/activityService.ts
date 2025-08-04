@@ -3,7 +3,7 @@ import { get } from './api';
 import { mockActivityService } from './mockBackend';
 
 // Use mock service for development until backend is ready
-const useMock = false;
+const useMock = true;
 
 export interface ActivityLogFilters {
   type?: ActivityType;

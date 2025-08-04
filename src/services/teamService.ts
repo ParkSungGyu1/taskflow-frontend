@@ -3,7 +3,7 @@ import { get } from './api';
 import { mockTeamService } from './mockBackend';
 
 // Use mock service for development until backend is ready
-const useMock = false;
+const useMock = true;
 
 // Team Service API
 export const getTeams = async () => {

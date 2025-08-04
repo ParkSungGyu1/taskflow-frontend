@@ -4,7 +4,7 @@ import { mockAuthService } from './mockBackend';
 import { getToken, setToken, removeToken, isValidToken } from '../utils/security';
 
 // Use mock service for development until backend is ready
-const useMock = false;
+const useMock = true;
 
 /**
  * Authenticate user and store token

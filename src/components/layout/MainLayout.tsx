@@ -103,11 +103,11 @@ const MainLayout: React.FC = () => {
   };
 
   const menuItems = [
-    // { text: '대시보드', icon: <DashboardIcon />, path: '/' },
+    { text: '대시보드', icon: <DashboardIcon />, path: '/' },
     { text: '작업 보드', icon: <TaskIcon />, path: '/tasks' },
-    // { text: '팀 관리', icon: <TeamIcon />, path: '/team' },
-    // { text: '검색', icon: <SearchIcon />, path: '/search' },
-    // { text: '활동 로그', icon: <ActivityIcon />, path: '/activities' },
+    { text: '팀 관리', icon: <TeamIcon />, path: '/team' },
+    { text: '검색', icon: <SearchIcon />, path: '/search' },
+    { text: '활동 로그', icon: <ActivityIcon />, path: '/activities' },
   ];
 
   const userMenuItems = [

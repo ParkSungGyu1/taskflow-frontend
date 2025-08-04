@@ -117,8 +117,8 @@ const comments: Comment[] = [
     userId: 1,
     user: users[0],
     content: '인증 서비스 구현을 완료했습니다',
-    createdAt: subDays(new Date(), 5).toISOString(),
-    updatedAt: subDays(new Date(), 5).toISOString(),
+    createdAt: subDays(new Date(), 15).toISOString(),
+    updatedAt: subDays(new Date(), 15).toISOString(),
   },
   {
     id: 2,
@@ -126,8 +126,9 @@ const comments: Comment[] = [
     userId: 2,
     user: users[1],
     content: '좋은 작업입니다! 인증이 완벽하게 작동하고 있네요.',
-    createdAt: subDays(new Date(), 4).toISOString(),
-    updatedAt: subDays(new Date(), 4).toISOString(),
+    parentId: 1, // Reply to comment 1
+    createdAt: subDays(new Date(), 14).toISOString(),
+    updatedAt: subDays(new Date(), 14).toISOString(),
   },
   {
     id: 3,
@@ -137,6 +138,467 @@ const comments: Comment[] = [
     content: '와이어프레임 작업 중입니다. 곧 공유하겠습니다.',
     createdAt: subDays(new Date(), 2).toISOString(),
     updatedAt: subDays(new Date(), 2).toISOString(),
+  },
+  {
+    id: 4,
+    taskId: 1,
+    userId: 1,
+    user: users[0],
+    content: '감사합니다! 테스트 케이스도 모두 통과하고 있어요.',
+    parentId: 2, // Reply to comment 2
+    createdAt: subDays(new Date(), 13).toISOString(),
+    updatedAt: subDays(new Date(), 13).toISOString(),
+  },
+  {
+    id: 5,
+    taskId: 1,
+    userId: 2,
+    user: users[1],
+    content: '혹시 보안 관련해서 추가 검토가 필요할까요?',
+    createdAt: subDays(new Date(), 12).toISOString(),
+    updatedAt: subDays(new Date(), 12).toISOString(),
+  },
+  // Add more comments for taskId=1 to test infinite scroll
+  {
+    id: 7,
+    taskId: 1,
+    userId: 3,
+    user: users[2],
+    content: 'JWT 토큰 만료 시간은 어떻게 설정하셨나요?',
+    createdAt: subDays(new Date(), 11).toISOString(),
+    updatedAt: subDays(new Date(), 11).toISOString(),
+  },
+  {
+    id: 8,
+    taskId: 1,
+    userId: 1,
+    user: users[0],
+    content: '현재 24시간으로 설정했습니다. 필요하면 조정 가능해요.',
+    parentId: 7,
+    createdAt: subDays(new Date(), 10).toISOString(),
+    updatedAt: subDays(new Date(), 10).toISOString(),
+  },
+  {
+    id: 9,
+    taskId: 1,
+    userId: 2,
+    user: users[1],
+    content: '리프레시 토큰도 구현되어 있나요?',
+    createdAt: subDays(new Date(), 9).toISOString(),
+    updatedAt: subDays(new Date(), 9).toISOString(),
+  },
+  {
+    id: 10,
+    taskId: 1,
+    userId: 1,
+    user: users[0],
+    content: '네, 리프레시 토큰도 포함되어 있습니다. 유효기간은 7일입니다.',
+    parentId: 9,
+    createdAt: subDays(new Date(), 8).toISOString(),
+    updatedAt: subDays(new Date(), 8).toISOString(),
+  },
+  {
+    id: 11,
+    taskId: 1,
+    userId: 3,
+    user: users[2],
+    content: '소셜 로그인도 지원하나요?',
+    createdAt: subDays(new Date(), 7).toISOString(),
+    updatedAt: subDays(new Date(), 7).toISOString(),
+  },
+  {
+    id: 12,
+    taskId: 1,
+    userId: 1,
+    user: users[0],
+    content: '현재는 이메일/비밀번호만 지원하고, 소셜 로그인은 다음 단계로 계획되어 있습니다.',
+    parentId: 11,
+    createdAt: subDays(new Date(), 6).toISOString(),
+    updatedAt: subDays(new Date(), 6).toISOString(),
+  },
+  {
+    id: 13,
+    taskId: 1,
+    userId: 2,
+    user: users[1],
+    content: '비밀번호 복잡성 검증도 포함되어 있나요?',
+    createdAt: subDays(new Date(), 5).toISOString(),
+    updatedAt: subDays(new Date(), 5).toISOString(),
+  },
+  {
+    id: 14,
+    taskId: 1,
+    userId: 1,
+    user: users[0],
+    content: '네, 최소 8자리에 대소문자, 숫자, 특수문자를 포함하도록 구현했습니다.',
+    parentId: 13,
+    createdAt: subDays(new Date(), 4).toISOString(),
+    updatedAt: subDays(new Date(), 4).toISOString(),
+  },
+  {
+    id: 15,
+    taskId: 1,
+    userId: 3,
+    user: users[2],
+    content: '2FA(이중 인증)은 어떤가요?',
+    createdAt: subDays(new Date(), 3).toISOString(),
+    updatedAt: subDays(new Date(), 3).toISOString(),
+  },
+  {
+    id: 16,
+    taskId: 1,
+    userId: 1,
+    user: users[0],
+    content: '2FA는 향후 버전에서 추가 예정입니다. 현재는 기본 인증에 집중했습니다.',
+    parentId: 15,
+    createdAt: subDays(new Date(), 2).toISOString(),
+    updatedAt: subDays(new Date(), 2).toISOString(),
+  },
+  {
+    id: 17,
+    taskId: 1,
+    userId: 2,
+    user: users[1],
+    content: '계정 잠금 기능은 구현되어 있나요?',
+    createdAt: subDays(new Date(), 1).toISOString(),
+    updatedAt: subDays(new Date(), 1).toISOString(),
+  },
+  {
+    id: 18,
+    taskId: 1,
+    userId: 1,
+    user: users[0],
+    content: '5회 연속 로그인 실패 시 15분간 계정이 잠기도록 구현했습니다.',
+    parentId: 17,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
+  {
+    id: 19,
+    taskId: 1,
+    userId: 3,
+    user: users[2],
+    content: '정말 훌륭한 작업이네요! 보안 측면에서 잘 고려된 것 같습니다.',
+    createdAt: new Date(Date.now() - 60 * 60 * 1000).toISOString(), // 1 hour ago
+    updatedAt: new Date(Date.now() - 60 * 60 * 1000).toISOString(),
+  },
+  {
+    id: 20,
+    taskId: 1,
+    userId: 2,
+    user: users[1],
+    content: '이제 프론트엔드 통합 작업을 시작할 수 있겠네요.',
+    createdAt: new Date(Date.now() - 30 * 60 * 1000).toISOString(), // 30 minutes ago
+    updatedAt: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
+  },
+  {
+    id: 21,
+    taskId: 1,
+    userId: 1,
+    user: users[0],
+    content: '네, API 문서도 업데이트했으니 참고해주세요!',
+    parentId: 20,
+    createdAt: new Date(Date.now() - 15 * 60 * 1000).toISOString(), // 15 minutes ago
+    updatedAt: new Date(Date.now() - 15 * 60 * 1000).toISOString(),
+  },
+  {
+    id: 22,
+    taskId: 1,
+    userId: 3,
+    user: users[2],
+    content: '테스트 코드 커버리지는 어떻게 되나요?',
+    createdAt: new Date(Date.now() - 5 * 60 * 1000).toISOString(), // 5 minutes ago
+    updatedAt: new Date(Date.now() - 5 * 60 * 1000).toISOString(),
+  },
+  {
+    id: 23,
+    taskId: 1,
+    userId: 1,
+    user: users[0],
+    content: '현재 95% 커버리지를 달성했습니다. 모든 주요 케이스를 다루고 있어요.',
+    parentId: 22,
+    createdAt: new Date(Date.now() - 2 * 60 * 1000).toISOString(), // 2 minutes ago
+    updatedAt: new Date(Date.now() - 2 * 60 * 1000).toISOString(),
+  },
+  {
+    id: 6,
+    taskId: 2,
+    userId: 1,
+    user: users[0],
+    content: '기대하고 있겠습니다! 언제쯤 초안을 볼 수 있을까요?',
+    parentId: 3, // Reply to comment 3
+    createdAt: subDays(new Date(), 1).toISOString(),
+    updatedAt: subDays(new Date(), 1).toISOString(),
+  },
+  {
+    id: 7,
+    taskId: 2,
+    userId: 3,
+    user: users[2],
+    content: '이번 주 금요일까지 초안을 공유하겠습니다.',
+    parentId: 6, // Reply to comment 6
+    createdAt: subDays(new Date(), 1).toISOString(),
+    updatedAt: subDays(new Date(), 1).toISOString(),
+  },
+  {
+    id: 8,
+    taskId: 1,
+    userId: 3,
+    user: users[2],
+    content: '코드 품질이 정말 좋아졌네요. 팀 전체적으로 실력이 향상된 것 같습니다.',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
+  {
+    id: 9,
+    taskId: 1,
+    userId: 1,
+    user: users[0],
+    content: '다음 프로젝트에서는 TDD를 도입해보는 것도 좋을 것 같아요.',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
+  {
+    id: 10,
+    taskId: 1,
+    userId: 2,
+    user: users[1],
+    content: 'TDD 좋은 생각이네요! 테스트 코드 작성 가이드라인도 만들어보죠.',
+    parentId: 9,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
+  {
+    id: 11,
+    taskId: 1,
+    userId: 3,
+    user: users[2],
+    content: '성능 최적화 결과를 공유해주세요. 어떤 부분이 가장 많이 개선되었나요?',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
+  {
+    id: 12,
+    taskId: 1,
+    userId: 1,
+    user: users[0],
+    content: '가장 큰 개선은 데이터베이스 쿼리 최적화였습니다. 50% 이상 빨라졌어요.',
+    parentId: 11,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
+  {
+    id: 13,
+    taskId: 1,
+    userId: 2,
+    user: users[1],
+    content: '놀랍네요! 구체적인 최적화 방법을 문서로 정리해주시면 팀에 도움이 될 것 같아요.',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
+  {
+    id: 14,
+    taskId: 1,
+    userId: 3,
+    user: users[2],
+    content: '이번 기능 개발로 많은 것을 배웠습니다. 감사합니다!',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
+  {
+    id: 15,
+    taskId: 1,
+    userId: 1,
+    user: users[0],
+    content: '앞으로도 이런 식으로 협력해나가면 좋겠어요.',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
+  {
+    id: 16,
+    taskId: 1,
+    userId: 2,
+    user: users[1],
+    content: '정말 유익한 프로젝트였습니다. 다음에도 함께 작업했으면 좋겠어요!',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
+  {
+    id: 17,
+    taskId: 1,
+    userId: 3,
+    user: users[2],
+    content: '이번에 배운 기술들을 다른 프로젝트에도 적용해보고 싶어요.',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
+  {
+    id: 18,
+    taskId: 1,
+    userId: 1,
+    user: users[0],
+    content: '좋은 아이디어네요! 기술 공유 세션도 가져보면 어떨까요?',
+    parentId: 17,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
+  {
+    id: 19,
+    taskId: 1,
+    userId: 2,
+    user: users[1],
+    content: '이번 스프린트에서 가장 인상깊었던 것은 팀워크였어요.',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
+  {
+    id: 20,
+    taskId: 1,
+    userId: 3,
+    user: users[2],
+    content: '저도 같은 생각입니다. 서로 도와가며 문제를 해결하는 모습이 좋았어요.',
+    parentId: 19,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
+  {
+    id: 21,
+    taskId: 1,
+    userId: 1,
+    user: users[0],
+    content: '다음 프로젝트에서는 더 도전적인 기술을 시도해볼까요?',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
+  {
+    id: 22,
+    taskId: 1,
+    userId: 2,
+    user: users[1],
+    content: 'GraphQL이나 마이크로서비스 아키텍처는 어떨까요?',
+    parentId: 21,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
+  {
+    id: 23,
+    taskId: 1,
+    userId: 3,
+    user: users[2],
+    content: '컨테이너화도 고려해볼 만하겠네요. Docker와 Kubernetes를 활용해보면?',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
+  {
+    id: 24,
+    taskId: 1,
+    userId: 1,
+    user: users[0],
+    content: '모든 아이디어가 흥미롭네요! 기술 스택 검토 미팅을 잡아보죠.',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
+  {
+    id: 25,
+    taskId: 1,
+    userId: 2,
+    user: users[1],
+    content: '이번 프로젝트를 통해 많은 성장을 했다고 느껴집니다.',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
+  {
+    id: 26,
+    taskId: 1,
+    userId: 3,
+    user: users[2],
+    content: '개발 프로세스도 많이 개선되었어요. 코드 리뷰 문화가 정착되었네요.',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
+  {
+    id: 27,
+    taskId: 1,
+    userId: 1,
+    user: users[0],
+    content: '버그 발생률도 현저히 줄었고, 코드 품질이 향상되었습니다.',
+    parentId: 26,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
+  {
+    id: 28,
+    taskId: 1,
+    userId: 2,
+    user: users[1],
+    content: '사용자 피드백도 매우 긍정적이었어요. 특히 성능 개선 부분에서요.',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
+  {
+    id: 29,
+    taskId: 1,
+    userId: 3,
+    user: users[2],
+    content: '다음 릴리즈 때는 더 많은 기능을 추가할 수 있을 것 같아요.',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
+  {
+    id: 30,
+    taskId: 1,
+    userId: 1,
+    user: users[0],
+    content: '팀의 역량이 많이 향상되었네요. 자신감도 생겼고요!',
+    parentId: 29,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
+  {
+    id: 31,
+    taskId: 1,
+    userId: 2,
+    user: users[1],
+    content: '이제 더 복잡한 프로젝트도 충분히 해낼 수 있을 것 같습니다.',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
+  {
+    id: 32,
+    taskId: 1,
+    userId: 3,
+    user: users[2],
+    content: '정말 좋은 경험이었어요. 모든 팀원들에게 감사드립니다!',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
+  {
+    id: 33,
+    taskId: 1,
+    userId: 1,
+    user: users[0],
+    content: '이번 프로젝트의 성공을 바탕으로 더 큰 도전을 해봅시다!',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
+  {
+    id: 34,
+    taskId: 1,
+    userId: 2,
+    user: users[1],
+    content: '네, 기대됩니다! 계속해서 혁신적인 솔루션을 만들어나가요.',
+    parentId: 33,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
+  {
+    id: 35,
+    taskId: 1,
+    userId: 3,
+    user: users[2],
+    content: '함께 성장하는 팀이 되어 정말 기쁩니다!',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
   },
 ];
 
@@ -227,6 +689,35 @@ function paginateResults<T>(items: T[], page: number, size: number): PagedRespon
     size,
     number: page
   };
+}
+
+// Helper function to organize comments into hierarchical structure
+function organizeComments(comments: Comment[]): Comment[] {
+  const commentMap = new Map<number, Comment>();
+  const topLevelComments: Comment[] = [];
+
+  // First pass: create comment map and initialize replies array
+  comments.forEach(comment => {
+    commentMap.set(comment.id, { ...comment, replies: [] });
+  });
+
+  // Second pass: organize into hierarchy
+  comments.forEach(comment => {
+    const commentWithReplies = commentMap.get(comment.id)!;
+    
+    if (comment.parentId) {
+      // This is a reply
+      const parentComment = commentMap.get(comment.parentId);
+      if (parentComment) {
+        parentComment.replies!.push(commentWithReplies);
+      }
+    } else {
+      // This is a top-level comment
+      topLevelComments.push(commentWithReplies);
+    }
+  });
+
+  return topLevelComments;
 }
 
 // Mock API handlers
@@ -552,15 +1043,35 @@ export const mockTaskService = {
 };
 
 export const mockCommentService = {
-  getTaskComments: async (taskId: number) => {
+  getTaskComments: async (taskId: number, page: number = 0, size: number = 10) => {
     await delay(300);
     
-    const taskComments = comments.filter(c => c.taskId === taskId);
+    // YouTube style: 모든 댓글을 시간순으로 평면적으로 표시
+    const taskComments = comments
+      .filter(c => c.taskId === taskId)
+      .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
     
-    return createSuccessResponse(paginateResults(taskComments, 0, 20));
+    console.log(`목 백엔드: taskId ${taskId}의 전체 댓글 ${taskComments.length}개, 요청 페이지 ${page}, 크기 ${size}`);
+    
+    const paginatedResult = paginateResults(taskComments, page, size);
+    
+    console.log(`목 백엔드 pagination 결과:`, {
+      contentLength: paginatedResult.content.length,
+      totalElements: paginatedResult.totalElements,
+      totalPages: paginatedResult.totalPages,
+      currentPage: paginatedResult.number,
+      hasMore: page < paginatedResult.totalPages - 1,
+      startIndex: page * size,
+      endIndex: page * size + paginatedResult.content.length
+    });
+    
+    // 실제 반환되는 댓글 ID들 확인
+    console.log('반환되는 댓글 ID들:', paginatedResult.content.map(c => c.id));
+    
+    return createSuccessResponse(paginatedResult);
   },
   
-  createComment: async (taskId: number, commentData: { content: string }) => {
+  createComment: async (taskId: number, commentData: { content: string, parentId?: number }) => {
     await delay(500);
     
     if (!tasks.some(t => t.id === taskId)) {
@@ -572,12 +1083,26 @@ export const mockCommentService = {
       } as ApiResponse<null>;
     }
     
+    // If parentId is provided, verify the parent comment exists and belongs to the same task
+    if (commentData.parentId) {
+      const parentComment = comments.find(c => c.id === commentData.parentId && c.taskId === taskId);
+      if (!parentComment) {
+        return {
+          success: false,
+          message: '대댓글의 부모 댓글을 찾을 수 없습니다',
+          data: null,
+          timestamp: new Date().toISOString(),
+        } as ApiResponse<null>;
+      }
+    }
+    
     const newComment: Comment = {
-      id: comments.length + 1,
+      id: Math.max(...comments.map(c => c.id), 0) + 1,
       taskId,
       userId: 1, // Assuming current user is admin
       user: users[0],
       content: commentData.content,
+      parentId: commentData.parentId || undefined,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
@@ -592,7 +1117,9 @@ export const mockCommentService = {
       action: 'added_comment',
       targetType: 'comment',
       targetId: newComment.id,
-      description: `작업 #${taskId}에 댓글을 작성했습니다`,
+      description: commentData.parentId 
+        ? `작업 #${taskId}에 대댓글을 작성했습니다`
+        : `작업 #${taskId}에 댓글을 작성했습니다`,
       createdAt: new Date().toISOString(),
     });
     
@@ -627,9 +1154,9 @@ export const mockCommentService = {
   deleteComment: async (taskId: number, commentId: number) => {
     await delay(400);
     
-    const commentIndex = comments.findIndex(c => c.id === commentId && c.taskId === taskId);
+    const comment = comments.find(c => c.id === commentId && c.taskId === taskId);
     
-    if (commentIndex === -1) {
+    if (!comment) {
       return {
         success: false,
         message: '댓글을 찾을 수 없습니다',
@@ -638,7 +1165,27 @@ export const mockCommentService = {
       };
     }
     
-    comments.splice(commentIndex, 1);
+    // Find all comments to delete (the comment and its replies recursively)
+    const commentsToDelete: number[] = [];
+    
+    const findReplies = (parentId: number) => {
+      const replies = comments.filter(c => c.parentId === parentId && c.taskId === taskId);
+      replies.forEach(reply => {
+        commentsToDelete.push(reply.id);
+        findReplies(reply.id); // Recursively find nested replies
+      });
+    };
+    
+    commentsToDelete.push(commentId);
+    findReplies(commentId);
+    
+    // Remove all comments
+    commentsToDelete.forEach(id => {
+      const index = comments.findIndex(c => c.id === id);
+      if (index !== -1) {
+        comments.splice(index, 1);
+      }
+    });
     
     // Create an activity for the comment deletion
     activities.push({
@@ -648,13 +1195,13 @@ export const mockCommentService = {
       action: 'deleted_comment',
       targetType: 'comment',
       targetId: commentId,
-      description: `작업 #${taskId}의 댓글을 삭제했습니다`,
+      description: `작업 #${taskId}의 댓글${commentsToDelete.length > 1 ? '과 대댓글들' : ''}을 삭제했습니다`,
       createdAt: new Date().toISOString(),
     });
     
     return {
       success: true,
-      message: '댓글이 삭제되었습니다.',
+      message: `댓글${commentsToDelete.length > 1 ? '과 대댓글들이' : '이'} 삭제되었습니다.`,
       data: null,
       timestamp: new Date().toISOString(),
     };
