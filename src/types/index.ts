@@ -73,6 +73,20 @@ export interface Team {
   members?: User[];
 }
 
+export interface CreateTeamRequest {
+  name: string;
+  description: string;
+}
+
+export interface UpdateTeamRequest {
+  name?: string;
+  description?: string;
+}
+
+export interface AddMemberRequest {
+  userId: number;
+}
+
 // Comment Types
 export interface Comment {
   id: number;

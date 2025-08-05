@@ -1,4 +1,4 @@
-import { Task, User, Team, Comment, Activity, TaskStatus, TaskPriority, UserRole, DashboardStats, MyTaskSummary, ApiResponse, PagedResponse, PagedApiResponse, ActivityLog, ActivityType } from '../types';
+import { Task, User, Team, Comment, Activity, TaskStatus, TaskPriority, UserRole, DashboardStats, MyTaskSummary, ApiResponse, PagedResponse, PagedApiResponse, ActivityLog, ActivityType, CreateTeamRequest, UpdateTeamRequest, AddMemberRequest } from '../types';
 import { subDays, addDays, format } from 'date-fns';
 import { ActivityLogFilters } from './activityService';
 
@@ -1275,6 +1275,167 @@ export const mockTeamService = {
     }
     
     return createSuccessResponse(team.members || []);
+  },
+
+  createTeam: async (request: CreateTeamRequest) => {
+    await delay(300);
+    
+    // Check if team name already exists
+    const existingTeam = teams.find(t => t.name === request.name);
+    if (existingTeam) {
+      return {
+        success: false,
+        message: '팀 이름이 이미 존재합니다',
+        data: null,
+        timestamp: new Date().toISOString(),
+      } as ApiResponse<null>;
+    }
+    
+    const newTeam: Team = {
+      id: teams.length > 0 ? Math.max(...teams.map(t => t.id)) + 1 : 1,
+      name: request.name,
+      description: request.description,
+      createdAt: new Date().toISOString(),
+      members: []
+    };
+    
+    teams.push(newTeam);
+    return createSuccessResponse(newTeam);
+  },
+
+  updateTeam: async (id: number, request: UpdateTeamRequest) => {
+    await delay(300);
+    
+    const teamIndex = teams.findIndex(t => t.id === id);
+    if (teamIndex === -1) {
+      return {
+        success: false,
+        message: '팀을 찾을 수 없습니다',
+        data: null,
+        timestamp: new Date().toISOString(),
+      } as ApiResponse<null>;
+    }
+    
+    // Check if new name conflicts with existing team
+    if (request.name && teams.some(t => t.id !== id && t.name === request.name)) {
+      return {
+        success: false,
+        message: '팀 이름이 이미 존재합니다',
+        data: null,
+        timestamp: new Date().toISOString(),
+      } as ApiResponse<null>;
+    }
+    
+    if (request.name) teams[teamIndex].name = request.name;
+    if (request.description !== undefined) teams[teamIndex].description = request.description;
+    
+    return createSuccessResponse(teams[teamIndex]);
+  },
+
+  deleteTeam: async (id: number) => {
+    await delay(300);
+    
+    const teamIndex = teams.findIndex(t => t.id === id);
+    if (teamIndex === -1) {
+      return {
+        success: false,
+        message: '팀을 찾을 수 없습니다',
+        data: null,
+        timestamp: new Date().toISOString(),
+      } as ApiResponse<null>;
+    }
+    
+    teams.splice(teamIndex, 1);
+    return createSuccessResponse({ message: '팀이 성공적으로 삭제되었습니다' });
+  },
+
+  addMember: async (teamId: number, request: AddMemberRequest) => {
+    await delay(300);
+    
+    const team = teams.find(t => t.id === teamId);
+    if (!team) {
+      return {
+        success: false,
+        message: '팀을 찾을 수 없습니다',
+        data: null,
+        timestamp: new Date().toISOString(),
+      } as ApiResponse<null>;
+    }
+    
+    const user = users.find(u => u.id === request.userId);
+    if (!user) {
+      return {
+        success: false,
+        message: '사용자를 찾을 수 없습니다',
+        data: null,
+        timestamp: new Date().toISOString(),
+      } as ApiResponse<null>;
+    }
+    
+    // Check if user is already a member
+    if (team.members?.some(m => m.id === request.userId)) {
+      return {
+        success: false,
+        message: '사용자가 이미 팀 멤버입니다',
+        data: null,
+        timestamp: new Date().toISOString(),
+      } as ApiResponse<null>;
+    }
+    
+    if (!team.members) team.members = [];
+    team.members.push(user);
+    
+    return createSuccessResponse(team);
+  },
+
+  removeMember: async (teamId: number, userId: number) => {
+    await delay(300);
+    
+    const team = teams.find(t => t.id === teamId);
+    if (!team) {
+      return {
+        success: false,
+        message: '팀을 찾을 수 없습니다',
+        data: null,
+        timestamp: new Date().toISOString(),
+      } as ApiResponse<null>;
+    }
+    
+    if (!team.members || !team.members.some(m => m.id === userId)) {
+      return {
+        success: false,
+        message: '사용자가 팀 멤버가 아닙니다',
+        data: null,
+        timestamp: new Date().toISOString(),
+      } as ApiResponse<null>;
+    }
+    
+    team.members = team.members.filter(m => m.id !== userId);
+    
+    return createSuccessResponse(team);
+  },
+
+  getAvailableUsers: async (teamId?: number) => {
+    await delay(300);
+    
+    if (!teamId) {
+      return createSuccessResponse(users);
+    }
+    
+    const team = teams.find(t => t.id === teamId);
+    if (!team) {
+      return {
+        success: false,
+        message: '팀을 찾을 수 없습니다',
+        data: null,
+        timestamp: new Date().toISOString(),
+      } as ApiResponse<null>;
+    }
+    
+    const memberIds = team.members?.map(m => m.id) || [];
+    const availableUsers = users.filter(u => !memberIds.includes(u.id));
+    
+    return createSuccessResponse(availableUsers);
   },
 };
 
