@@ -15,6 +15,9 @@ import {
   CircularProgress,
   Paper,
   Alert,
+  FormControl,
+  Select,
+  MenuItem,
 } from '@mui/material';
 import {
   Send as SendIcon,
@@ -131,8 +134,9 @@ const CommentItem: React.FC<CommentItemProps> = ({
 const Comments: React.FC<CommentsProps> = ({ taskId }) => {
   const { user } = useAuth();
   const [comments, setComments] = useState<Comment[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true); // 초기 로딩 상태를 true로 설정
   const [loadingMore, setLoadingMore] = useState(false);
+  const [isInitialLoad, setIsInitialLoad] = useState(true); // 최초 로딩인지 체크
   const [commentText, setCommentText] = useState('');
   const [replyText, setReplyText] = useState('');
   const [replyingTo, setReplyingTo] = useState<number | null>(null);
@@ -140,13 +144,14 @@ const Comments: React.FC<CommentsProps> = ({ taskId }) => {
   const [currentPage, setCurrentPage] = useState(0);
   const [totalComments, setTotalComments] = useState(0);
   const [error, setError] = useState('');
+  const [sortOrder, setSortOrder] = useState<'newest' | 'oldest'>('newest');
 
   const pageSize = 10;
   const loadingRef = useRef(false);
 
   const fetchComments = useCallback(async (page: number = 0, append: boolean = false) => {
     try {
-      console.log(`댓글 로딩 시작: 페이지 ${page}, append: ${append}`);
+      console.log(`댓글 로딩 시작: 페이지 ${page}, append: ${append}, 정렬: ${sortOrder}`);
       
       if (page === 0) {
         setLoading(true);
@@ -155,7 +160,7 @@ const Comments: React.FC<CommentsProps> = ({ taskId }) => {
       }
       setError('');
 
-      const response = await getTaskComments(taskId, page, pageSize);
+      const response = await getTaskComments(taskId, page, pageSize, sortOrder);
       
       if (response.success && response.data) {
         const newComments = response.data.content;
@@ -185,8 +190,9 @@ const Comments: React.FC<CommentsProps> = ({ taskId }) => {
     } finally {
       setLoading(false);
       setLoadingMore(false);
+      setIsInitialLoad(false); // 첫 번째 로딩 완료 표시
     }
-  }, [taskId, pageSize]);
+  }, [taskId, sortOrder]); // pageSize는 상수이므로 의존성에서 제거
 
   const handleLoadMore = useCallback(() => {
     console.log('handleLoadMore 호출됨:', {
@@ -208,9 +214,11 @@ const Comments: React.FC<CommentsProps> = ({ taskId }) => {
     }
   }, [loadingMore, hasMore, currentPage, fetchComments]);
 
+  // 초기 로딩과 정렬 변경 시에만 실행
   useEffect(() => {
     fetchComments(0, false);
-  }, [fetchComments]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [taskId, sortOrder]); // fetchComments를 의존성에 포함하면 무한 루프 발생
 
   // 무한 스크롤을 위한 scroll 이벤트 리스너
   useEffect(() => {
@@ -327,7 +335,17 @@ const Comments: React.FC<CommentsProps> = ({ taskId }) => {
     setReplyText('');
   };
 
-  if (loading && comments.length === 0) {
+  const handleSortChange = (newSortOrder: 'newest' | 'oldest') => {
+    setSortOrder(newSortOrder);
+    // 정렬 변경 시 상태 초기화
+    setCurrentPage(0);
+    setHasMore(true);
+    setComments([]);
+    setIsInitialLoad(true); // 정렬 변경 시에도 로딩 표시
+    // sortOrder 변경으로 useEffect가 자동으로 fetchComments를 호출함
+  };
+
+  if (isInitialLoad || (loading && comments.length === 0)) {
     return (
       <Box display="flex" justifyContent="center" p={3}>
         <CircularProgress />
@@ -337,9 +355,30 @@ const Comments: React.FC<CommentsProps> = ({ taskId }) => {
 
   return (
     <Paper sx={{ p: 3 }}>
-      <Typography variant="h6" gutterBottom sx={{ mb: 3 }}>
-        댓글 {totalComments > 0 && `${totalComments}개`}
-      </Typography>
+      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3 }}>
+        <Typography variant="h6">
+          댓글 {totalComments > 0 && `${totalComments}개`}
+        </Typography>
+        <FormControl size="small" sx={{ minWidth: 120 }}>
+          <Select
+            value={sortOrder}
+            onChange={(e) => handleSortChange(e.target.value as 'newest' | 'oldest')}
+            displayEmpty
+            sx={{
+              '& .MuiSelect-select': {
+                py: 0.5,
+                fontSize: '0.875rem',
+              },
+              '& .MuiOutlinedInput-notchedOutline': {
+                borderColor: 'divider',
+              },
+            }}
+          >
+            <MenuItem value="newest" sx={{ fontSize: '0.875rem' }}>최신순</MenuItem>
+            <MenuItem value="oldest" sx={{ fontSize: '0.875rem' }}>오래된순</MenuItem>
+          </Select>
+        </FormControl>
+      </Box>
 
       {error && (
         <Alert severity="error" sx={{ mb: 2 }}>

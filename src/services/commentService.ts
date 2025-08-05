@@ -6,14 +6,15 @@ import { mockCommentService } from './mockBackend';
 const useMock = true;
 
 // Comment Service API
-export const getTaskComments = async (taskId: number, page: number = 0, size: number = 10) => {
+export const getTaskComments = async (taskId: number, page: number = 0, size: number = 10, sortOrder: 'newest' | 'oldest' = 'newest') => {
   if (useMock) {
-    return mockCommentService.getTaskComments(taskId, page, size);
+    return mockCommentService.getTaskComments(taskId, page, size, sortOrder);
   }
   
   const params = new URLSearchParams();
   params.append('page', page.toString());
   params.append('size', size.toString());
+  params.append('sort', sortOrder);
   
   return get<PagedResponse<Comment>>(`/tasks/${taskId}/comments?${params.toString()}`);
 };

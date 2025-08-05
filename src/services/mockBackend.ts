@@ -1043,17 +1043,44 @@ export const mockTaskService = {
 };
 
 export const mockCommentService = {
-  getTaskComments: async (taskId: number, page: number = 0, size: number = 10) => {
+  getTaskComments: async (taskId: number, page: number = 0, size: number = 10, sortOrder: 'newest' | 'oldest' = 'newest') => {
     await delay(300);
     
-    // YouTube style: 모든 댓글을 시간순으로 평면적으로 표시
-    const taskComments = comments
-      .filter(c => c.taskId === taskId)
-      .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+    // 해당 작업의 모든 댓글 가져오기
+    const allTaskComments = comments.filter(c => c.taskId === taskId);
     
-    console.log(`목 백엔드: taskId ${taskId}의 전체 댓글 ${taskComments.length}개, 요청 페이지 ${page}, 크기 ${size}`);
+    // 부모 댓글들만 먼저 분리하고 정렬
+    const parentComments = allTaskComments
+      .filter(c => !c.parentId)
+      .sort((a, b) => {
+        const dateA = new Date(a.createdAt).getTime();
+        const dateB = new Date(b.createdAt).getTime();
+        
+        if (sortOrder === 'newest') {
+          return dateB - dateA; // 최신순 (내림차순)
+        } else {
+          return dateA - dateB; // 오래된순 (오름차순)
+        }
+      });
     
-    const paginatedResult = paginateResults(taskComments, page, size);
+    // 각 부모 댓글에 대한 대댓글들을 시간순으로 정렬하여 계층 구조 생성
+    const organizedComments: Comment[] = [];
+    
+    parentComments.forEach(parentComment => {
+      // 부모 댓글 추가
+      organizedComments.push(parentComment);
+      
+      // 해당 부모 댓글의 대댓글들을 시간순(오름차순)으로 추가
+      const replies = allTaskComments
+        .filter(c => c.parentId === parentComment.id)
+        .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+      
+      organizedComments.push(...replies);
+    });
+    
+    console.log(`목 백엔드: taskId ${taskId}의 전체 댓글 ${organizedComments.length}개 (부모: ${parentComments.length}개), 요청 페이지 ${page}, 크기 ${size}, 정렬: ${sortOrder}`);
+    
+    const paginatedResult = paginateResults(organizedComments, page, size);
     
     console.log(`목 백엔드 pagination 결과:`, {
       contentLength: paginatedResult.content.length,
@@ -1065,8 +1092,12 @@ export const mockCommentService = {
       endIndex: page * size + paginatedResult.content.length
     });
     
-    // 실제 반환되는 댓글 ID들 확인
-    console.log('반환되는 댓글 ID들:', paginatedResult.content.map(c => c.id));
+    // 실제 반환되는 댓글 ID들 확인 (부모/대댓글 구분)
+    console.log('반환되는 댓글:', paginatedResult.content.map(c => ({
+      id: c.id,
+      parentId: c.parentId || 'root',
+      content: c.content.substring(0, 20) + '...'
+    })));
     
     return createSuccessResponse(paginatedResult);
   },
