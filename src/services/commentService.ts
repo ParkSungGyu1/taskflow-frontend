@@ -3,7 +3,7 @@ import { get, post, put, del } from './api';
 import { mockCommentService } from './mockBackend';
 
 // Use mock service for development until backend is ready
-const useMock = true;
+const useMock = false;
 
 // Comment Service API
 export const getTaskComments = async (taskId: number, page: number = 0, size: number = 10, sortOrder: 'newest' | 'oldest' = 'newest') => {

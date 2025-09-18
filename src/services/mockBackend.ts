@@ -1573,6 +1573,42 @@ export const mockDashboardService = {
       teams: matchedTeams,
     });
   },
+  
+  getWeeklyTrend: async () => {
+    await delay(400);
+    
+    // 안정적인 주간 추세 데이터 (실제 시나리오를 반영)
+    const today = new Date();
+    const weekDays = ['일', '월', '화', '수', '목', '금', '토'];
+    const trendData = [];
+    
+    // 미리 정의된 패턴 데이터 (주중 높고, 주말 낮음)
+    const weeklyPattern = [
+      { tasks: 2, completed: 1 }, // 일요일
+      { tasks: 8, completed: 6 }, // 월요일
+      { tasks: 12, completed: 10 }, // 화요일  
+      { tasks: 10, completed: 8 }, // 수요일
+      { tasks: 9, completed: 7 }, // 목요일
+      { tasks: 11, completed: 9 }, // 금요일
+      { tasks: 3, completed: 2 }  // 토요일
+    ];
+    
+    for (let i = 6; i >= 0; i--) {
+      const date = new Date(today);
+      date.setDate(date.getDate() - i);
+      const dayOfWeek = date.getDay();
+      const pattern = weeklyPattern[dayOfWeek];
+      
+      trendData.push({
+        name: weekDays[dayOfWeek],
+        tasks: pattern.tasks,
+        completed: pattern.completed,
+        date: date.toISOString().split('T')[0]
+      });
+    }
+    
+    return createSuccessResponse(trendData);
+  },
 };
 
 export const mockActivityService = {

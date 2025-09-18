@@ -11,6 +11,7 @@ import {
   ListItem,
   ListItemText,
   ListItemAvatar,
+  ListItemIcon,
   Avatar,
   Divider,
   useTheme,
@@ -51,27 +52,26 @@ import {
   Dashboard as DashboardIcon,
   BarChart as ChartIcon,
 } from '@mui/icons-material';
-import { getDashboardStats, getMyTasks, getMyActivities } from '../../services/dashboardService';
+import { getDashboardStats, getMyTasks, getMyActivities, getWeeklyTrend } from '../../services/dashboardService';
 import { DashboardStats, Activity, Task } from '../../types';
 import LoadingIndicator from '../common/LoadingIndicator';
 import ErrorMessage from '../common/ErrorMessage';
 import { formatDate } from '../../utils/formatters';
 import { useAuth } from '../../context/AuthContext';
 
-// 주간 추세 데이터 (모킹)
-const trendData = [
-  { name: '월', tasks: 4, completed: 2 },
-  { name: '화', tasks: 3, completed: 3 },
-  { name: '수', tasks: 5, completed: 4 },
-  { name: '목', tasks: 7, completed: 3 },
-  { name: '금', tasks: 4, completed: 4 },
-  { name: '토', tasks: 2, completed: 2 },
-  { name: '일', tasks: 1, completed: 1 },
-];
+// 주간 추세 데이터 (API에서 가져올 예정)
+interface TrendData {
+  name: string;
+  tasks: number;
+  completed: number;
+  date?: string;
+}
 
 // DashboardStats 타입 확장
 interface EnhancedDashboardStats extends DashboardStats {
   totalTasksChange?: number;
+  delayRate?: number;
+  progressRate?: number;
 }
 
 interface TabPanelProps {
@@ -111,6 +111,7 @@ const Dashboard: React.FC = () => {
   const [stats, setStats] = useState<EnhancedDashboardStats | null>(null);
   const [myTasks, setMyTasks] = useState<{ todayTasks: Task[], upcomingTasks: Task[], overdueTasks: Task[] } | null>(null);
   const [activities, setActivities] = useState<Activity[]>([]);
+  const [trendData, setTrendData] = useState<TrendData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [menuAnchorEl, setMenuAnchorEl] = useState<null | HTMLElement>(null);
@@ -124,12 +125,24 @@ const Dashboard: React.FC = () => {
         const statsResponse = await getDashboardStats();
         const tasksResponse = await getMyTasks();
         const activitiesResponse = await getMyActivities();
+        const trendResponse = await getWeeklyTrend();
 
         if (statsResponse.success) {
-          // 모의 데이터 추가
+          // 실제 계산된 데이터 추가
+          const delayRate = statsResponse.data.totalTasks > 0 
+            ? Math.round((statsResponse.data.overdueTasks / statsResponse.data.totalTasks) * 100)
+            : 0;
+          
+          // 진행률 계산 (진행중 작업 / 전체 작업 * 100)
+          const progressRate = statsResponse.data.totalTasks > 0
+            ? Math.round((statsResponse.data.inProgressTasks / statsResponse.data.totalTasks) * 100)
+            : 0;
+            
           const enhancedStats: EnhancedDashboardStats = {
             ...statsResponse.data,
-            totalTasksChange: 3 // 예시 데이터
+            totalTasksChange: 0,
+            delayRate,
+            progressRate
           };
           setStats(enhancedStats);
         }
@@ -142,6 +155,10 @@ const Dashboard: React.FC = () => {
           setActivities(Array.isArray(activitiesResponse.data) 
             ? activitiesResponse.data 
             : activitiesResponse.data.content || []);
+        }
+        
+        if (trendResponse.success) {
+          setTrendData(trendResponse.data || []);
         }
       } catch (err) {
         console.error('Error fetching dashboard data:', err);
@@ -352,11 +369,11 @@ const Dashboard: React.FC = () => {
                 </Box>
                 <Box sx={{ mt: 2 }}>
                   <Typography variant="h2" sx={{ fontWeight: 700, lineHeight: 1, mb: 1 }}>
-                    {stats?.totalTasks || 5}
+                    {stats?.totalTasks || 0}
                   </Typography>
                   <Typography variant="body1" color="success.main" sx={{ fontWeight: 500, display: 'flex', alignItems: 'center' }}>
                     <TrendingUpIcon sx={{ fontSize: 18, mr: 0.5 }} />
-                    {stats?.totalTasksChange || 3}% 증가
+                    {stats?.totalTasksChange || 0}% 증가
                   </Typography>
                 </Box>
               </CardContent>
@@ -406,11 +423,11 @@ const Dashboard: React.FC = () => {
                 </Box>
                 <Box sx={{ mt: 2 }}>
                   <Typography variant="h2" sx={{ fontWeight: 700, lineHeight: 1, mb: 1 }}>
-                    {stats?.completedTasks || 1}
+                    {stats?.completedTasks || 0}
                   </Typography>
                   <Typography variant="body1" color="success.main" sx={{ fontWeight: 500, display: 'flex', alignItems: 'center' }}>
                     <TrendingUpIcon sx={{ fontSize: 18, mr: 0.5 }} />
-                    20% 완료율
+                    {stats?.completionRate || 0}% 완료율
                   </Typography>
                 </Box>
               </CardContent>
@@ -460,11 +477,11 @@ const Dashboard: React.FC = () => {
                 </Box>
                 <Box sx={{ mt: 2 }}>
                   <Typography variant="h2" sx={{ fontWeight: 700, lineHeight: 1, mb: 1 }}>
-                    {stats?.inProgressTasks || 2}
+                    {stats?.inProgressTasks || 0}
                   </Typography>
                   <Typography variant="body1" color="info.main" sx={{ fontWeight: 500, display: 'flex', alignItems: 'center' }}>
                     <TrendingUpIcon sx={{ fontSize: 18, mr: 0.5 }} />
-                    진행률 20%
+                    진행률 {stats?.progressRate || 0}%
                   </Typography>
                 </Box>
               </CardContent>
@@ -518,7 +535,7 @@ const Dashboard: React.FC = () => {
                   </Typography>
                   <Typography variant="body1" color="error.main" sx={{ fontWeight: 500, display: 'flex', alignItems: 'center' }}>
                     <TrendingUpIcon sx={{ fontSize: 18, mr: 0.5, transform: 'rotate(180deg)' }} />
-                    지연율 8%
+                    지연율 {stats?.delayRate || 0}%
                   </Typography>
                 </Box>
               </CardContent>
@@ -561,14 +578,57 @@ const Dashboard: React.FC = () => {
                       fontWeight: 600,
                     }}
                   >
-                    오늘 (0)
+                    오늘 ({myTasks?.todayTasks?.length || 0})
                   </Typography>
                 </Box>
               </Box>
-              <Box sx={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', p: 4 }}>
-                <Typography variant="h5" color="text.secondary" textAlign="center">
-                  오늘 예정된 작업이 없습니다.
-                </Typography>
+              <Box sx={{ flex: 1, p: 2 }}>
+                {myTasks?.todayTasks && myTasks.todayTasks.length > 0 ? (
+                  <List sx={{ p: 0 }}>
+                    {myTasks.todayTasks.slice(0, 3).map((task) => (
+                      <ListItem key={task.id} sx={{ px: 2, py: 1.5 }}>
+                        <ListItemIcon sx={{ minWidth: 36 }}>
+                          <Box
+                            sx={{
+                              width: 8,
+                              height: 8,
+                              borderRadius: '50%',
+                              bgcolor: task.priority === 'HIGH' ? 'error.main' : 
+                                       task.priority === 'MEDIUM' ? 'warning.main' : 'success.main'
+                            }}
+                          />
+                        </ListItemIcon>
+                        <ListItemText
+                          primary={
+                            <Typography variant="body2" fontWeight={500} noWrap>
+                              {task.title}
+                            </Typography>
+                          }
+                          secondary={
+                            <Typography variant="caption" color="text.secondary">
+                              {task.assignee?.name || '미지정'}
+                            </Typography>
+                          }
+                        />
+                      </ListItem>
+                    ))}
+                    {myTasks.todayTasks.length > 3 && (
+                      <ListItem sx={{ px: 2, py: 1 }}>
+                        <ListItemText>
+                          <Typography variant="body2" color="text.secondary" textAlign="center">
+                            +{myTasks.todayTasks.length - 3}개 더 보기...
+                          </Typography>
+                        </ListItemText>
+                      </ListItem>
+                    )}
+                  </List>
+                ) : (
+                  <Box sx={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', p: 4 }}>
+                    <Typography variant="h5" color="text.secondary" textAlign="center">
+                      오늘 예정된 작업이 없습니다.
+                    </Typography>
+                  </Box>
+                )}
               </Box>
             </Paper>
           </Grid>
@@ -595,85 +655,74 @@ const Dashboard: React.FC = () => {
                 </Typography>
               </Box>
               <Box sx={{ flex: 1, overflow: 'auto' }}>
-                <List sx={{ p: 0 }}>
-                  <ListItem 
-                    alignItems="flex-start" 
-                    sx={{ 
-                      px: 4, 
-                      py: 3,
-                      transition: 'background-color 0.2s',
-                      ':hover': {
-                        bgcolor: alpha(theme.palette.secondary.main, 0.03),
-                      },
+                {activities && activities.length > 0 ? (
+                  <List sx={{ p: 0 }}>
+                    {activities.slice(0, 3).map((activity, index) => (
+                      <React.Fragment key={activity.id}>
+                        <ListItem
+                          alignItems="flex-start"
+                          sx={{
+                            px: 4,
+                            py: 3,
+                            transition: 'background-color 0.2s',
+                            ':hover': {
+                              bgcolor: alpha(theme.palette.secondary.main, 0.03),
+                            },
+                          }}
+                        >
+                          <ListItemAvatar>
+                            <Avatar sx={{ bgcolor: 'secondary.main', width: 48, height: 48 }}>
+                              {activity.user?.name?.charAt(0) || '?'}
+                            </Avatar>
+                          </ListItemAvatar>
+                          <ListItemText
+                            primary={
+                              <Typography variant="h6" fontWeight={600} sx={{ mb: 1 }}>
+                                {activity.description}
+                              </Typography>
+                            }
+                            secondary={
+                              <Typography variant="body1" color="text.secondary" sx={{ mt: 0.5 }}>
+                                {new Date(activity.createdAt).toLocaleDateString('ko-KR', {
+                                  year: 'numeric',
+                                  month: 'long',
+                                  day: 'numeric'
+                                })}
+                              </Typography>
+                            }
+                          />
+                        </ListItem>
+                        {index < Math.min(activities.length, 3) - 1 && <Divider component="li" />}
+                      </React.Fragment>
+                    ))}
+                  </List>
+                ) : (
+                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', py: 8 }}>
+                    <Typography variant="h5" color="text.secondary" textAlign="center">
+                      최근 활동이 없습니다.
+                    </Typography>
+                  </Box>
+                )}
+              </Box>
+              {activities && activities.length > 3 && (
+                <Box sx={{
+                  p: 4,
+                  textAlign: 'center',
+                  borderTop: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
+                }}>
+                  <Typography
+                    variant="h6"
+                    color="secondary.main"
+                    sx={{
+                      cursor: 'pointer',
+                      fontWeight: 600,
+                      ':hover': { textDecoration: 'underline' },
                     }}
                   >
-                    <ListItemAvatar>
-                      <Avatar sx={{ bgcolor: 'error.main', width: 48, height: 48 }}>
-                        관
-                      </Avatar>
-                    </ListItemAvatar>
-                    <ListItemText
-                      primary={
-                        <Typography variant="h6" fontWeight={600} sx={{ mb: 1 }}>
-                          "사용자 인증 구현"을 완료로 이동했습니다
-                        </Typography>
-                      }
-                      secondary={
-                        <Typography variant="body1" color="text.secondary" sx={{ mt: 0.5 }}>
-                          2025년 5월 29일
-                        </Typography>
-                      }
-                    />
-                  </ListItem>
-                  <Divider component="li" />
-                  <ListItem 
-                    alignItems="flex-start" 
-                    sx={{ 
-                      px: 4, 
-                      py: 3,
-                      transition: 'background-color 0.2s',
-                      ':hover': {
-                        bgcolor: alpha(theme.palette.secondary.main, 0.03),
-                      },
-                    }}
-                  >
-                    <ListItemAvatar>
-                      <Avatar sx={{ bgcolor: 'error.main', width: 48, height: 48 }}>
-                        관
-                      </Avatar>
-                    </ListItemAvatar>
-                    <ListItemText
-                      primary={
-                        <Typography variant="h6" fontWeight={600} sx={{ mb: 1 }}>
-                          "사용자 인증 구현" 작업을 생성했습니다
-                        </Typography>
-                      }
-                      secondary={
-                        <Typography variant="body1" color="text.secondary" sx={{ mt: 0.5 }}>
-                          2025년 5월 24일
-                        </Typography>
-                      }
-                    />
-                  </ListItem>
-                </List>
-              </Box>
-              <Box sx={{ 
-                p: 4, 
-                textAlign: 'center',
-                borderTop: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
-              }}>
-                <Typography 
-                  variant="h6" 
-                  color="secondary.main" 
-                  sx={{ 
-                    cursor: 'pointer', 
-                    fontWeight: 600,
-                    ':hover': { textDecoration: 'underline' },
-                  }}
-                >
-                  모든 활동 보기
-                </Typography>
-              </Box>
+                    +{activities.length - 3}개 활동 더 보기
+                  </Typography>
+                </Box>
+              )}
             </Paper>
           </Grid>
         </Grid>

@@ -3,7 +3,7 @@ import { get } from './api';
 import { mockDashboardService } from './mockBackend';
 
 // Use mock service for development until backend is ready
-const useMock = true;
+const useMock = false;
 
 // Dashboard & Reports Service API
 export const getDashboardStats = async () => {
@@ -65,4 +65,13 @@ export const search = async (query: string) => {
     return mockDashboardService.search(query);
   }
   return get<any>(`/search?query=${encodeURIComponent(query)}`);
+};
+
+// 주간 작업 추세 데이터 (임시 - 실제 API 구현 대기)
+export const getWeeklyTrend = async () => {
+  if (useMock) {
+    return mockDashboardService.getWeeklyTrend();
+  }
+  // TODO: 실제 백엔드 API 구현 필요
+  return get<any>('/dashboard/weekly-trend');
 }; 
